@@ -51,22 +51,24 @@ to run — this is just a personal code that lets the app talk to Claude on
 your behalf, similar to a password. You paste in your own; it's never seen
 by anyone but Anthropic.
 
-## What's in this repo
+**Want your own copy instead of just using the link above?** That means
+making your own separate version of this whole project — on GitHub this is
+called "forking." You don't need to do this to use the app; it's only for
+someone who wants to run and control their own copy.
+
+1. Click **Fork** at the top of this page (GitHub's button for copying a
+   whole project to your own account).
+2. In your new copy, go to **Settings → Pages**.
+3. Source: **Deploy from a branch** → Branch: `main`, folder: `/ (root)` → **Save**.
+4. Wait a minute, refresh — your link is
+   `https://<your-username>.github.io/career-materials-builder/`.
+
+## What's in this project
 
 - `index.html` — the live app
 - `career-materials-builder-prompt.md` — Part 1, plain text
 - `linkedin-profile-builder-prompt.md` — Part 2, plain text
 - `LICENSE` — MIT, free to use, copy, and adapt
-
-## Want your own copy? (not needed just to use the link above)
-
-This is only for someone who wants to fork this repo and host their own
-version — if you just want to use the app, click the link above instead.
-
-1. In your fork, go to **Settings → Pages**.
-2. Source: **Deploy from a branch** → Branch: `main`, folder: `/ (root)` → **Save**.
-3. Wait a minute, refresh — your link is
-   `https://<your-username>.github.io/career-materials-builder/`.
 
 ## Privacy note
 
