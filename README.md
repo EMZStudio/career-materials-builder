@@ -21,7 +21,7 @@ to try. You don't need to install anything to use the prompts below.
 
 Run Part 1 first, then Part 2 — or use either on its own.
 
-## How to use a prompt (takes 2 minutes)
+## Getting started (the setup below takes 2 minutes — the process itself doesn't)
 
 1. Click one of the two files above.
 2. Copy everything under the line that says "paste everything below this."
@@ -29,6 +29,16 @@ Run Part 1 first, then Part 2 — or use either on its own.
 4. Attach whatever career material you have — old resumes, LinkedIn export,
    performance reviews, messy notes. Nothing needs to be sorted first.
 5. Answer honestly. It interviews you step by step from there.
+
+That last step is the real work, and it's meant to take real time — one
+sitting or several, however long an honest interview about your career
+actually takes. Anything that promises to do this in 2 minutes is skipping
+the part that makes it worth doing.
+
+One more honest thing: this only works as well as you're willing to be with
+it. A vague or padded answer gets you a vague, padded resume back. A
+specific, honest one — including the parts you'd rather not lead with — gets
+you something you can actually defend in an interview.
 
 ## The live app (optional, Claude-powered)
 
@@ -64,7 +74,15 @@ The app talks to Anthropic directly from your browser using your own key —
 nothing passes through a server of mine, because there isn't one. Don't
 share a link with your key already filled in; everyone brings their own.
 
-## Credit
+## Why this exists
 
-Built with [Claude](https://claude.com). MIT licensed — adapt it, rename it,
-make it yours.
+Every AI resume tool I tried had the same problem: it wanted to impress, not
+verify. It'll happily round up a title or invent a metric if you let it. So
+I built one with the opposite rule — say only what's true, flag what isn't,
+and let the honest version turn out stronger anyway. The boring, careful
+process turns out to produce a resume you can actually defend across the
+table from someone asking follow-up questions.
+
+## About
+
+Made by EMZStudio. MIT licensed — adapt it, rename it, make it yours.
