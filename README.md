@@ -1,119 +1,70 @@
 # Career Materials Builder
 
-A single-page app version of the *Career Materials Builder* prompt. It attaches
-your career documents, runs the phase-by-phase interview, and calls Claude
-directly from your browser — no server required.
+A two-part toolkit — **1) a resume/source-of-truth builder** and
+**2) a LinkedIn profile builder** — built around one rule: it won't state
+anything it can't verify. No invented metrics, no inflated titles. Just an
+honest, step-by-step interview that turns your real career history into
+material you can actually trust.
 
-It's one file: `index.html`. Open it locally, or host it for free on GitHub Pages.
+**New to AI tools?** This works with "AI chat" websites — a page you type
+into and get a written answer back, the same way you'd text a very
+knowledgeable person. [Claude](https://claude.ai) (made by Anthropic) and
+[ChatGPT](https://chatgpt.com) are the two best-known ones, and both are free
+to try. You don't need to install anything to use the prompts below.
 
-## How it works
+## The two prompts
 
-- The whole prompt (ground rules, phases 0–7, calibration examples) is baked in
-  as the system prompt. You can see and edit it in the app under
-  **Setup → Advanced → edit the underlying prompt**.
-- You paste in your own Anthropic API key. It's kept in memory in your browser
-  tab only, sent directly to `api.anthropic.com`, and never touches any other
-  server — including no server of mine, since there isn't one.
-- File uploads (PDF, DOCX, TXT/MD, images) are read client-side and sent as
-  attachments on your next message.
-- Web search is on by default so Phase 6 (pay/market data) and Phase 7
-  (current resume standards) can pull real, current information.
-- A small "spine" on the left guesses which phase you're in from the
-  assistant's own checkpoints — it's a compass, not a tracker to rely on.
-- **Export chat** downloads the whole conversation as Markdown, so you can
-  re-upload it next session (the prompt's "Continuity" step).
+| | What it builds | File |
+|---|---|---|
+| **Part 1** | Your resume + a reusable "source of truth" document | [`career-materials-builder-prompt.md`](./career-materials-builder-prompt.md) |
+| **Part 2** | Your LinkedIn profile, using the same source of truth | [`linkedin-profile-builder-prompt.md`](./linkedin-profile-builder-prompt.md) |
 
-## Get an API key
+Run Part 1 first, then Part 2 — or use either on its own.
 
-1. Go to [console.anthropic.com](https://console.anthropic.com/settings/keys)
-   and sign in (or create an account).
-2. Create a new API key.
-3. Add a small amount of credit under **Billing** — this app is pay-as-you-go
-   per Anthropic's standard API pricing, separate from any Claude.ai
-   subscription. A full run through all phases with a few documents will
-   likely cost low single-digit dollars; Phase 4 (master inventory) and
-   Phase 6 (market research) are the priciest steps since they read/write the
-   most.
+## How to use a prompt (takes 2 minutes)
 
-## Run it locally
+1. Click one of the two files above.
+2. Copy everything under the line that says "paste everything below this."
+3. Paste it into Claude, ChatGPT, or any AI chat tool.
+4. Attach whatever career material you have — old resumes, LinkedIn export,
+   performance reviews, messy notes. Nothing needs to be sorted first.
+5. Answer honestly. It interviews you step by step from there.
 
-Just open `index.html` in a browser — double-click it, or:
+## The live app (optional, Claude-powered)
 
-```bash
-open index.html        # macOS
-xdg-open index.html    # Linux
-start index.html        # Windows
-```
+👉 **[Open the app](#)** *(add your GitHub Pages link here once it's live)*
 
-No build step, no `npm install`, no dependencies to install locally (Mammoth,
-the DOCX reader, loads from a CDN).
+Same Part 1 process, but as a real app: reads PDF/DOCX files directly, pulls
+live market data, and tracks which step you're on. Runs entirely in your
+browser. Needs a free [Anthropic API key](https://console.anthropic.com/settings/keys)
+to run — this is just a personal code that lets the app talk to Claude on
+your behalf, similar to a password. You paste in your own; it's never seen
+by anyone but Anthropic.
 
-## Put it on GitHub and host it for free
+## What's in this repo
 
-**No coding or command line needed — just GitHub's website:**
+- `index.html` — the live app
+- `career-materials-builder-prompt.md` — Part 1, plain text
+- `linkedin-profile-builder-prompt.md` — Part 2, plain text
+- `LICENSE` — MIT, free to use, copy, and adapt
 
-1. Create a free account at [github.com](https://github.com), if you don't
-   have one.
-2. Click the **+** in the top-right corner → **New repository**. Name it
-   `career-materials-builder`, set it to **Public**, and click
-   **Create repository**.
-3. On the new, empty repo page, click **"uploading an existing file."** Drag
-   in `index.html`, `README.md`, and `LICENSE`, then click **Commit changes**.
-4. Go to **Settings → Pages** (left sidebar). Under "Source," choose
-   **Deploy from a branch** → Branch: `main`, folder: `/ (root)` → **Save**.
-   Wait a minute, refresh, and GitHub gives you a live URL like
+## Want your own copy? (not needed just to use the link above)
+
+This is only for someone who wants to fork this repo and host their own
+version — if you just want to use the app, click the link above instead.
+
+1. In your fork, go to **Settings → Pages**.
+2. Source: **Deploy from a branch** → Branch: `main`, folder: `/ (root)` → **Save**.
+3. Wait a minute, refresh — your link is
    `https://<your-username>.github.io/career-materials-builder/`.
-5. Open that URL, paste in your API key, and you're running.
 
-**If you're comfortable with git instead**, the command-line equivalent of
-steps 2–3:
+## Privacy note
 
-```bash
-git init
-git add index.html README.md LICENSE
-git commit -m "Career Materials Builder"
-git branch -M main
-git remote add origin https://github.com/<your-username>/<repo-name>.git
-git push -u origin main
-```
+The app talks to Anthropic directly from your browser using your own key —
+nothing passes through a server of mine, because there isn't one. Don't
+share a link with your key already filled in; everyone brings their own.
 
-## A real security note (please read)
+## Credit
 
-This app calls the Anthropic API **directly from the browser**, using a
-header (`anthropic-dangerous-direct-browser-access`) that Anthropic added
-specifically to support "bring your own key" tools like this one. That's a
-legitimate, documented pattern — but it comes with a real tradeoff:
-
-- **Anyone who has your key can use it.** Because the key lives in the page
-  you're viewing, it's visible in your browser's network tab while you use
-  the app. That's fine when only you are using it with your own key.
-- **Don't publish your key**, hardcode it into `index.html`, or commit it to
-  the repo. Always paste it in at runtime.
-- **If you ever want other people to use this app**, don't have them paste in
-  your key. At that point you'd want a small backend (e.g. a Node/Express
-  server or a serverless function) that holds the key server-side and the
-  browser talks to instead of Anthropic directly. Happy to build that version
-  if this ever grows beyond personal use.
-
-## Customizing
-
-- **Change the process itself**: edit the text in **Setup → Advanced → edit
-  the underlying prompt** right in the app (e.g. drop the market-pay research
-  step, or dial bluntness up or down). Changes only apply for that browser
-  session — edit `SYSTEM_PROMPT_DEFAULT` near the top of the `<script>` in
-  `index.html` to make a change permanent.
-- **Switch models**: the dropdown offers Claude Sonnet 5 (fast, cheap, the
-  default) and Claude Opus 4.8 (slower and more expensive, occasionally worth
-  it for the densest phases like the master inventory or gap check).
-- **Design**: colors and type live in the `:root` CSS variables at the top of
-  `index.html` if you want to reskin it.
-
-## Continuing the LinkedIn Profile Builder (Part 2)
-
-The original toolkit pairs this with a separate LinkedIn Profile Builder
-prompt that reuses the same master inventory — it's included here as
-`linkedin-profile-builder-prompt.md`. Same usage: copy it, paste it into
-Claude, ChatGPT, or any AI chat tool with file upload and web search, and
-attach your master inventory (and resume, if you have one) instead of
-starting from scratch. It isn't built into `index.html` yet — if you want
-that (a second tab in the same app), just ask.
+Built with [Claude](https://claude.com). MIT licensed — adapt it, rename it,
+make it yours.
