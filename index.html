@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Career Materials Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.11.0/mammoth.browser.min.js"></script>
+<style>
+  :root{
+    --ink:#20241f;
+    --paper:#eeeae0;
+    --paper-2:#f7f5ee;
+    --line:#d6cfbc;
+    --moss:#3f5d4b;
+    --moss-dark:#2b4335;
+    --flag:#a8503a;
+    --muted:#7a7466;
+    --user-bubble:#20241f;
+    --assist-bubble:#ffffff;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    font-size:15px;
+    line-height:1.5;
+  }
+  h1,h2,h3{font-family:'Source Serif 4',Georgia,serif; margin:0;}
+  #app{
+    display:flex;
+    min-height:100vh;
+    max-width:1180px;
+    margin:0 auto;
+  }
+  /* ---------- Spine (signature element) ---------- */
+  .spine{
+    width:190px;
+    flex-shrink:0;
+    padding:28px 14px 28px 22px;
+    border-right:1px solid var(--line);
+    position:sticky;
+    top:0;
+    align-self:flex-start;
+    height:100vh;
+    overflow-y:auto;
+  }
+  .spine h1{font-size:19px; line-height:1.15; letter-spacing:-0.01em;}
+  .spine .kicker{
+    font-size:11px; text-transform:uppercase; letter-spacing:.12em;
+    color:var(--muted); margin-bottom:6px; font-weight:600;
+  }
+  .spine ol{list-style:none; margin:22px 0 0; padding:0;}
+  .spine li{
+    position:relative;
+    padding:7px 0 7px 20px;
+    font-size:12.5px;
+    color:var(--muted);
+    border-left:2px solid var(--line);
+    margin-left:5px;
+    transition:color .25s, border-color .25s;
+  }
+  .spine li::before{
+    content:'';
+    position:absolute; left:-6px; top:13px;
+    width:9px; height:9px; border-radius:50%;
+    background:var(--paper-2); border:2px solid var(--line);
+    transition:background .25s, border-color .25s;
+  }
+  .spine li.active{color:var(--ink); font-weight:600; border-left-color:var(--moss);}
+  .spine li.active::before{background:var(--moss); border-color:var(--moss);}
+  .spine li.done{color:var(--moss-dark); border-left-color:var(--moss);}
+  .spine li.done::before{background:var(--moss); border-color:var(--moss);}
+  .spine .note{
+    margin-top:26px; font-size:11.5px; color:var(--muted); line-height:1.5;
+  }
+
+  /* ---------- Main column ---------- */
+  main{flex:1; min-width:0; display:flex; flex-direction:column; padding:28px 32px 24px;}
+  .topbar{display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:6px;}
+  .topbar p{margin:4px 0 0; color:var(--muted); font-size:13px; max-width:56ch;}
+  .iconbtn{
+    background:none; border:1px solid var(--line); color:var(--ink);
+    font-family:inherit; font-size:12.5px; padding:7px 12px; border-radius:7px;
+    cursor:pointer;
+  }
+  .iconbtn:hover{border-color:var(--moss); color:var(--moss-dark);}
+
+  details.setup{
+    margin-top:16px; border:1px solid var(--line); border-radius:10px;
+    background:var(--paper-2);
+  }
+  details.setup summary{
+    cursor:pointer; padding:12px 16px; font-weight:600; font-size:13.5px;
+    list-style:none; display:flex; align-items:center; gap:8px;
+  }
+  details.setup summary::-webkit-details-marker{display:none;}
+  details.setup summary::before{content:'▸'; color:var(--moss); font-size:11px;}
+  details.setup[open] summary::before{content:'▾';}
+  .setup-body{padding:2px 16px 16px;}
+  .field-row{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:12px;}
+  .field{flex:1; min-width:200px;}
+  .field label{display:block; font-size:12px; font-weight:600; margin-bottom:5px; color:var(--muted);}
+  .field input[type=password],
+  .field input[type=text],
+  .field select{
+    width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:6px;
+    font-family:inherit; font-size:13px; background:#fff; color:var(--ink);
+  }
+  .toggle-row{display:flex; align-items:center; gap:8px; font-size:13px; margin-top:4px;}
+  .hint{font-size:11.5px; color:var(--muted); margin-top:5px; line-height:1.5;}
+  .hint a{color:var(--moss-dark);}
+  textarea#promptEdit{
+    width:100%; min-height:140px; font-family:ui-monospace,Menlo,monospace;
+    font-size:11.5px; padding:10px; border:1px solid var(--line); border-radius:6px;
+    background:#fff; color:var(--ink); resize:vertical;
+  }
+
+  /* ---------- Chat ---------- */
+  #chat{
+    flex:1; overflow-y:auto; margin-top:18px; padding-right:4px;
+    display:flex; flex-direction:column; gap:14px;
+  }
+  .msg{max-width:78%; display:flex; flex-direction:column; gap:6px;}
+  .msg.user{align-self:flex-end; align-items:flex-end;}
+  .msg.assistant{align-self:flex-start; align-items:flex-start;}
+  .bubble{
+    padding:12px 15px; border-radius:12px; font-size:14px; line-height:1.55;
+    white-space:pre-wrap;
+  }
+  .msg.user .bubble{background:var(--user-bubble); color:var(--paper-2); border-bottom-right-radius:3px;}
+  .msg.assistant .bubble{background:var(--assist-bubble); border:1px solid var(--line); border-bottom-left-radius:3px;}
+  .bubble p{margin:0 0 .7em;}
+  .bubble p:last-child{margin-bottom:0;}
+  .bubble strong{font-weight:700;}
+  .bubble ul{margin:.3em 0 .7em; padding-left:1.3em;}
+  .bubble h4{font-family:'Source Serif 4',serif; font-size:15px; margin:.4em 0 .3em;}
+  .chips{display:flex; gap:6px; flex-wrap:wrap;}
+  .chip{
+    font-size:11px; padding:3px 9px; border-radius:99px; border:1px solid var(--line);
+    color:var(--muted); background:var(--paper-2);
+  }
+  .chip.search{color:var(--moss-dark); border-color:var(--moss);}
+  .chip.flag{color:var(--flag); border-color:var(--flag);}
+  .thinking{display:flex; gap:4px; padding:14px 15px;}
+  .thinking span{width:6px; height:6px; border-radius:50%; background:var(--muted); animation:pulse 1.2s infinite ease-in-out;}
+  .thinking span:nth-child(2){animation-delay:.2s;}
+  .thinking span:nth-child(3){animation-delay:.4s;}
+  @keyframes pulse{0%,80%,100%{opacity:.25;}40%{opacity:1;}}
+  .error-msg{color:var(--flag); font-size:13px; border:1px solid var(--flag); border-radius:8px; padding:10px 13px; background:#fbf0ee;}
+  .empty-state{
+    margin:auto; text-align:center; max-width:44ch; color:var(--muted);
+  }
+  .empty-state h2{font-size:20px; color:var(--ink); margin-bottom:8px;}
+  .empty-state button{
+    margin-top:14px; background:var(--moss); color:#fff; border:none;
+    padding:9px 18px; border-radius:8px; font-family:inherit; font-size:13.5px; cursor:pointer;
+  }
+
+  /* ---------- Attachments + composer ---------- */
+  #pending{display:flex; gap:6px; flex-wrap:wrap; margin-top:12px;}
+  .pending-chip{
+    display:flex; align-items:center; gap:6px; font-size:12px; background:var(--paper-2);
+    border:1px solid var(--line); border-radius:99px; padding:4px 6px 4px 11px;
+  }
+  .pending-chip button{
+    border:none; background:none; cursor:pointer; color:var(--muted);
+    width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  }
+  .pending-chip button:hover{background:var(--flag); color:#fff;}
+
+  #composer{
+    margin-top:12px; border:1px solid var(--line); border-radius:12px; background:#fff;
+    padding:8px 8px 8px 14px; display:flex; align-items:flex-end; gap:8px;
+  }
+  #composer textarea{
+    flex:1; border:none; outline:none; resize:none; font-family:inherit; font-size:14px;
+    line-height:1.5; max-height:160px; padding:8px 0; background:transparent;
+  }
+  .composer-actions{display:flex; align-items:center; gap:6px;}
+  .icon-round{
+    width:36px; height:36px; border-radius:50%; border:1px solid var(--line); background:var(--paper-2);
+    cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px; color:var(--muted);
+  }
+  .icon-round:hover{border-color:var(--moss); color:var(--moss-dark);}
+  #sendBtn{
+    background:var(--moss); border:none; color:#fff; width:38px; height:38px; border-radius:50%;
+    cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px;
+  }
+  #sendBtn:disabled{background:var(--muted); cursor:not-allowed;}
+  .footer-hint{font-size:11px; color:var(--muted); text-align:center; margin-top:8px;}
+
+  @media (max-width:820px){
+    #app{flex-direction:column;}
+    .spine{
+      width:100%; height:auto; position:static; border-right:none; border-bottom:1px solid var(--line);
+      padding:18px 20px;
+    }
+    .spine ol{display:flex; flex-wrap:wrap; gap:0 14px; margin-top:14px;}
+    .spine li{border-left:none; padding-left:14px; margin-left:0;}
+    .spine .note{display:none;}
+    main{padding:20px;}
+    .msg{max-width:92%;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <aside class="spine">
+    <div class="kicker">Case file</div>
+    <h1>Career Materials Builder</h1>
+    <ol id="phaseList">
+      <li data-phase="0">0 · Setup</li>
+      <li data-phase="1">1 · Reconcile sources</li>
+      <li data-phase="2">2 · Organize categories</li>
+      <li data-phase="3">3 · Interview</li>
+      <li data-phase="4">4 · Master inventory</li>
+      <li data-phase="5">5 · Gap check</li>
+      <li data-phase="6">6 · Positioning & pay</li>
+      <li data-phase="7">7 · Draft resume</li>
+    </ol>
+    <div class="note">Tracks roughly where the conversation is, based on the assistant's own checkpoints. Not authoritative — just a compass.</div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <div>
+        <h1 style="font-size:15px;">Build your source of truth, then your resume</h1>
+        <p>Paste your career docs, answer honestly, and this walks the phases with you. Nothing is invented — anything unverified gets flagged.</p>
+      </div>
+      <button class="iconbtn" id="downloadBtn" title="Download the conversation so far">⬇ Export chat</button>
+    </div>
+
+    <details class="setup" id="setupPanel" open>
+      <summary>Setup — API key, model, and files</summary>
+      <div class="setup-body">
+        <div class="field-row">
+          <div class="field">
+            <label for="apiKey">Anthropic API key</label>
+            <input type="password" id="apiKey" placeholder="sk-ant-…" autocomplete="off" />
+            <div class="hint">Stays in this browser tab only — sent straight to Anthropic, never anywhere else, and cleared on refresh. Get one at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>.</div>
+          </div>
+          <div class="field">
+            <label for="model">Model</label>
+            <select id="model">
+              <option value="claude-sonnet-5" selected>Claude Sonnet 5 (recommended)</option>
+              <option value="claude-opus-4-8">Claude Opus 4.8 (slower, more thorough)</option>
+            </select>
+          </div>
+        </div>
+        <div class="toggle-row">
+          <input type="checkbox" id="webSearchToggle" checked />
+          <label for="webSearchToggle">Allow web search (needed for Phase 6 market/pay data and Phase 7 resume-standards check)</label>
+        </div>
+        <div class="field" style="margin-top:14px;">
+          <label>Attach career documents</label>
+          <input type="file" id="fileInput" multiple accept=".pdf,.docx,.txt,.md,.png,.jpg,.jpeg,.webp" />
+          <div class="hint">Resumes, reviews, LinkedIn export, project docs — mixed and messy is fine. PDF, DOCX, TXT/MD, and images are all read directly.</div>
+        </div>
+        <details style="margin-top:14px;">
+          <summary style="cursor:pointer; font-size:12.5px; color:var(--muted);">Advanced — edit the underlying prompt</summary>
+          <div class="hint" style="margin:8px 0;">This is the exact instruction set driving the assistant. Edit it if you want to change the process — e.g. skip market-pay research or change how blunt it is.</div>
+          <textarea id="promptEdit"></textarea>
+        </details>
+      </div>
+    </details>
+
+    <div id="chat">
+      <div class="empty-state" id="emptyState">
+        <h2>Ready when you are</h2>
+        <p>Add your key above, attach any documents you have (or none — it can interview you from scratch), then say hello.</p>
+        <button id="starterBtn">Start the conversation</button>
+      </div>
+    </div>
+
+    <div id="pending"></div>
+
+    <form id="composer">
+      <textarea id="userInput" rows="1" placeholder="Message… (Shift+Enter for a new line)"></textarea>
+      <div class="composer-actions">
+        <button type="button" class="icon-round" id="attachBtn" title="Attach files">📎</button>
+        <button type="submit" id="sendBtn" title="Send">↑</button>
+      </div>
+    </form>
+    <div class="footer-hint">Responses can take a little while, especially when it's searching or writing the full master inventory.</div>
+  </main>
+</div>
+
+<script>
+const SYSTEM_PROMPT_DEFAULT = `Before anything else — confirm you can do this job. In your first reply, briefly confirm you will: build only from verified material (no fabrication), search for and cite live data where these instructions require it (or say plainly when you can't), and be honest rather than encouraging. If you cannot do any of these in this environment (for example, no web access or no file reading), say so up front so I know what I'm working with.
+
+Your role. Act as two experts working together: an executive resume writer and career strategist who thinks like a top-tier recruiter, and a rigorous editor. You are candid, specific, and allergic to filler, clichés, and fabrication. Your job is to help me build a resume — and later other materials — from a single reconciled source of truth about my career. Build that source of truth first; do not summarize me into one narrative or pick a direction until I say we're ready.
+
+Ground rules — follow throughout:
+Never fabricate. Don't invent employers, titles, dates, metrics, or duties. If you suggest phrasing or make an inference, label it as yours to confirm. Mark any unverified number as an open item rather than stating it as fact.
+If you can't search the web, tell me — then give directional guidance clearly flagged as such, rather than presenting it as current fact (this affects the market-data and current-standards steps).
+Don't infer my scope from my titles. Titles often understate or misstate what someone actually does, especially in a current role. Ask me directly.
+If I've given you any AI-generated write-ups about my background, treat them as leads to verify, not facts. Ignore their flattery and adjectives; confirm the substance with me or against primary documents.
+Be honest, not encouraging. When something is thin, a stretch, or a liability, say so plainly and explain why. Calibrate bluntness to the level I chose in the intake.
+Pace it. Ask concise questions in tight, small groups — never long multi-part lists. Stay conversational. This may span multiple sessions; if so, say so, and don't compress coverage to finish faster.
+If I stall, go thin, or want to pause, don't push. Offer to park it, note what's still open, and pick up later. Never pad with invented detail to keep momentum.
+End every phase with a checkpoint: a two-line summary of what's now captured, plus "ready to move on, or adjust?" Wait for me. At every checkpoint, before starting the next phase, re-check that phase's instructions for yourself and confirm with a single short tag — e.g. "✓ Phase [x] checked — proceeding" — not a full sentence. If you cannot fully follow a rule — especially searching-and-citing for data, avoiding fabrication, or giving an honest assessment — break format and flag it to me in full rather than skipping it silently.
+Protect the final documents: no overclaiming; frame unfinished work as "leading" or "building," never "implemented"; keep private names (clients, colleagues) out of anything public-facing unless I say otherwise.
+
+Calibration examples — match this quality bar (they're structural, not tied to any industry):
+Weak line: "Responsible for managing a team." → Strong line: "Led a team of [#]; [what changed as a result — a number, time saved, or an outcome]." (Outcome-first, specific, owns the verb.)
+Good conflict flag: "Source A shows your title as [X] for 2023–2025; Source B shows [Y] for the same span. Which is correct — and was there a mid-period change we should show?"
+Good gap-check note: "[A common expectation for your target level] doesn't appear anywhere. Real gap, or just not captured? It changes how senior we can position you."
+Good red-flag framing: "There's a [gap / short stint / frequent-move pattern] in your history. Let's decide how to handle it deliberately rather than leave a reader to wonder."
+
+How outputs are delivered (sensible defaults — tell me if you'd like them differently and I'll adapt; the format is ours to agree on, not something you impose):
+Work phase by phase, not all at once; end each phase with a short checkpoint.
+Present drafts as clean, ready-to-paste text, within the real character limits of wherever they'll go.
+When there are choices (headlines, summaries, titles), give 2–3 clearly labeled options with their tradeoffs, not one take-it-or-leave-it version.
+Put keywords, skills, and lists in scannable form; keep prose human and plain.
+Clearly mark anything unverified, estimated, or still open so I never mistake a guess for a fact.
+Deliver everything as in-chat text by default; if my tool can produce a downloadable file and I want one, offer it at the end — but never depend on it.
+
+Phase 0 — Setup. Read my intake and everything I've attached before asking anything. Confirm which track I chose (fast or thorough) and adapt: on the fast track, do a light Phase 1–3 and produce a working draft early, then deepen. If I said I have very little material, don't treat sparse history as a dead end — interview me to surface unwritten experience (projects, scope, informal responsibilities) instead of asking for documents I don't have.
+
+Phase 1 — Reconcile my sources. Note what's consistent across sources (higher confidence); flag anything appearing in only one source (keepable detail or error — ask); and list every place sources disagree on dates, titles, descriptions, scope, or metrics. Ask me to resolve each conflict. Checkpoint before Phase 2.
+
+Phase 2 — Organize into functional categories, not job titles. Group everything by what I actually do or have done (e.g., the kinds of work that recur across my roles, whatever they are). One job can span several categories. Show me the structure; let me adjust it. Checkpoint.
+
+Phase 3 — Interview me category by category until each has: Scope (reports, budget/spend, geography, systems owned); Authority (owned strategy, execution, or both; selected/nominated/self-built; who I influenced upward); Stakeholders; Quantified outcomes (numbers, %, time, risk — even estimates; flag unquantified as open); Durability (did it scale, stick, repeat, or lead to a bigger mandate). Give special attention to:
+My current role — what the title officially covers vs. what I actually do; what I've absorbed since starting, formally or informally; whether scope grew without a title change; whether I'm covering more-senior work; reporting line now vs. before.
+Role consolidation — if I absorbed another's role (restructuring/layoff/attrition): whose, what scope, why it came to me, when, combined scope now. Treat as a major data point.
+Secondments / special projects — how I was selected, full scope, my real role (design, execute, or both), any adjacent work beyond the mandate, and what happened after.
+In-progress work — objective, scope, my role, stage, expected impact. Frame as "leading/building," don't skip for lacking a finished outcome.
+Checkpoint.
+
+Phase 4 — Produce the master inventory. One structured document, organized by category, in resume-ready, outcome-first language, with context preserved beneath each line. Clearly mark: open items (numbers to retrieve), context-only items (not for publication), and accuracy rules (e.g., no names). This is the reusable source of truth — build rich once, cut from it many times. Checkpoint.
+
+Phase 5 — Honest gap check and red flags. Tell me critically: what's thin (missing metrics, weak categories); what someone at my target level is expected to have that hasn't come up (budget ownership, credentials, scale); any scope/seniority inconsistencies that could confuse a reader; and — separately — any red flags a recruiter would spot (employment gaps, short tenures, frequent moves, a career change, or optics like a smaller team now than before) with a deliberate plan to frame each. Then give concrete next steps. Checkpoint.
+
+Phase 6 — Positioning and targeting. First, propose a one-line positioning statement — the answer to "what am I, in one sentence?" — and refine it with me; everything downstream hangs off it. Then identify 3–4 realistic next-step roles. For each: typical scope at that level, what to lead with, what to de-emphasize, real gaps, and an honest read on how competitive I am (say so if it's a stretch). Calibrate whether I'm aiming a level too high or low. Pay and market reality check (guidance only): if you can search, pull current market data for my target roles and my location — give a range, not a single number, with the factors that move me within it (company size, industry, scope, budget ownership). Tell me honestly whether I'm in range (and what would justify the top of it), reaching (and specifically what would close the gap), or under-asking (don't leave money on the table). Also ground this in the real current market: pull several live job postings for my target role, extract the shared requirements and language, note where I match and where I'm light, and read whether demand looks to be growing or cooling in my area. Cite your sources, timestamp it ("as of [date]"), and add a short disclaimer — e.g. "Directional only, based on [source], as of [date]; pay and demand data are a snapshot that drifts, so verify against current listings. This is market context, not a salary promise or negotiation advice for a specific offer." If you can't search, say so, don't invent numbers, and point me to reliable sources (Robert Half's guide, Levels.fyi, Glassdoor, government labor statistics). For an actual offer in hand, point me to a person, not this prompt. Let me pick the 1–2 threads to lead with. Don't blend everything into a generalist story; sharp beats broad. Checkpoint.
+
+Phase 7 — Draft, to current standards. Draft a resume leading with my chosen positioning. Before finalizing conventions (length, first-person usage, formatting), verify current best practices rather than assuming — standards shift. Make it pass applicant tracking systems (relevant keywords placed where they're scanned) while sounding like a real person — plain, specific language, no corporate filler, no AI tells. Use verified metrics only. Build it as a base I can adapt per job, and note when a distinct target deserves its own cut from the same inventory. Checkpoint.
+
+Phase 7b — Tailor to a specific posting (when I have one). I'll paste a job description. Extract its must-have keywords, required qualifications, and stated priorities; then reorder and re-weight my resume to mirror them (using only true content), and tell me honestly where I match, where I'm light, and what to address in the cover letter or interview. This step can run on its own once the inventory exists.
+
+Extensions (optional, same source of truth). On request, reuse the inventory to build tailored cover letters and interview stories (STAR-format answers built from the achievements we captured). For a LinkedIn profile you can draft a starting version here, but the dedicated LinkedIn Profile Builder (Part 2 of this toolkit) does the full job — same inventory, adapted to LinkedIn's search, voice, and settings.
+
+Continuity. The master inventory is the memory. To pick up in a new session, I'll re-upload the inventory (and current resume) and tell you where we are. Keep those documents current so nothing is lost between conversations.`;
+
+document.getElementById('promptEdit').value = SYSTEM_PROMPT_DEFAULT;
+
+const state = {
+  history: [],       // full API-shaped messages: {role, content:[blocks]}
+  pending: [],        // attachments not yet sent: {name, block}
+  sending: false,
+};
+
+const els = {
+  chat: document.getElementById('chat'),
+  emptyState: document.getElementById('emptyState'),
+  composer: document.getElementById('composer'),
+  userInput: document.getElementById('userInput'),
+  sendBtn: document.getElementById('sendBtn'),
+  pendingBar: document.getElementById('pending'),
+  fileInput: document.getElementById('fileInput'),
+  attachBtn: document.getElementById('attachBtn'),
+  apiKey: document.getElementById('apiKey'),
+  model: document.getElementById('model'),
+  webSearchToggle: document.getElementById('webSearchToggle'),
+  promptEdit: document.getElementById('promptEdit'),
+  downloadBtn: document.getElementById('downloadBtn'),
+  starterBtn: document.getElementById('starterBtn'),
+  phaseList: document.getElementById('phaseList'),
+};
+
+els.attachBtn.addEventListener('click', () => els.fileInput.click());
+els.starterBtn.addEventListener('click', () => {
+  els.userInput.value = "Hi — I'd like to start building my career source of truth and resume.";
+  els.composer.dispatchEvent(new Event('submit', {cancelable:true}));
+});
+
+els.userInput.addEventListener('input', () => {
+  els.userInput.style.height = 'auto';
+  els.userInput.style.height = Math.min(els.userInput.scrollHeight, 160) + 'px';
+});
+els.userInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    els.composer.requestSubmit();
+  }
+});
+
+function fileToBase64(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = () => reject(new Error('Could not read ' + file.name));
+    reader.readAsDataURL(file);
+  });
+}
+function fileToText(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error('Could not read ' + file.name));
+    reader.readAsText(file);
+  });
+}
+
+els.fileInput.addEventListener('change', async () => {
+  const files = Array.from(els.fileInput.files || []);
+  for (const file of files) {
+    try {
+      const ext = file.name.split('.').pop().toLowerCase();
+      let block = null;
+      if (ext === 'pdf') {
+        const data = await fileToBase64(file);
+        block = { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data }, title: file.name };
+      } else if (ext === 'docx') {
+        const buf = await file.arrayBuffer();
+        const result = await mammoth.extractRawText({ arrayBuffer: buf });
+        block = { type: 'document', source: { type: 'text', media_type: 'text/plain', data: result.value }, title: file.name };
+      } else if (ext === 'txt' || ext === 'md') {
+        const text = await fileToText(file);
+        block = { type: 'document', source: { type: 'text', media_type: 'text/plain', data: text }, title: file.name };
+      } else if (['png','jpg','jpeg','webp','gif'].includes(ext)) {
+        const data = await fileToBase64(file);
+        const mediaType = ext === 'jpg' ? 'image/jpeg' : `image/${ext}`;
+        block = { type: 'image', source: { type: 'base64', media_type: mediaType, data } };
+      } else {
+        alert(`Skipping ${file.name} — unsupported file type.`);
+        continue;
+      }
+      state.pending.push({ name: file.name, block });
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+  els.fileInput.value = '';
+  renderPending();
+});
+
+function renderPending(){
+  els.pendingBar.innerHTML = '';
+  state.pending.forEach((item, idx) => {
+    const chip = document.createElement('div');
+    chip.className = 'pending-chip';
+    chip.innerHTML = `<span>📎 ${escapeHtml(item.name)}</span>`;
+    const btn = document.createElement('button');
+    btn.textContent = '×';
+    btn.title = 'Remove';
+    btn.addEventListener('click', () => { state.pending.splice(idx,1); renderPending(); });
+    chip.appendChild(btn);
+    els.pendingBar.appendChild(chip);
+  });
+}
+
+function escapeHtml(str){
+  return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// Small, safe-ish markdown-lite renderer for assistant text.
+function formatText(raw){
+  let text = escapeHtml(raw);
+  text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  text = text.replace(/^### (.*)$/gm, '<h4>$1</h4>');
+  text = text.replace(/^(?:- |• )(.*)$/gm, '<li>$1</li>');
+  text = text.replace(/(<li>.*<\/li>\n?)+/g, m => `<ul>${m}</ul>`);
+  text = text.split(/\n{2,}/).map(block => {
+    if (block.startsWith('<ul>') || block.startsWith('<h4>')) return block;
+    return `<p>${block.replace(/\n/g,'<br>')}</p>`;
+  }).join('');
+  return text;
+}
+
+function renderMessage(msg){
+  els.emptyState.style.display = 'none';
+  const wrap = document.createElement('div');
+  wrap.className = 'msg ' + (msg.role === 'user' ? 'user' : 'assistant');
+
+  const chips = document.createElement('div');
+  chips.className = 'chips';
+  let hasChips = false;
+
+  const textParts = [];
+  for (const block of msg.content) {
+    if (block.type === 'text') {
+      textParts.push(block.text);
+    } else if (block.type === 'document' || block.type === 'image') {
+      hasChips = true;
+      const c = document.createElement('span');
+      c.className = 'chip';
+      c.textContent = '📎 ' + (block.title || 'attachment');
+      chips.appendChild(c);
+    } else if (block.type === 'server_tool_use' && block.name === 'web_search') {
+      hasChips = true;
+      const c = document.createElement('span');
+      c.className = 'chip search';
+      c.textContent = '🔎 searched: ' + (block.input && block.input.query ? block.input.query : '…');
+      chips.appendChild(c);
+    }
+  }
+
+  if (hasChips) wrap.appendChild(chips);
+
+  if (textParts.length) {
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    if (msg.role === 'assistant') {
+      bubble.innerHTML = formatText(textParts.join('\n\n'));
+    } else {
+      bubble.textContent = textParts.join('\n\n');
+    }
+    wrap.appendChild(bubble);
+  }
+
+  els.chat.appendChild(wrap);
+  els.chat.scrollTop = els.chat.scrollHeight;
+  return wrap;
+}
+
+function updatePhaseTracker(assistantText){
+  const matches = [...assistantText.matchAll(/phase\s*\[?(\d)\]?/gi)];
+  if (!matches.length) return;
+  const last = parseInt(matches[matches.length-1][1], 10);
+  if (isNaN(last)) return;
+  els.phaseList.querySelectorAll('li').forEach(li => {
+    const p = parseInt(li.dataset.phase, 10);
+    li.classList.remove('active','done');
+    if (p < last) li.classList.add('done');
+    else if (p === last) li.classList.add('active');
+  });
+}
+
+async function callClaude(){
+  const apiKey = els.apiKey.value.trim();
+  if (!apiKey) {
+    alert('Add your Anthropic API key in Setup first.');
+    return null;
+  }
+  const model = els.model.value;
+  const tools = els.webSearchToggle.checked ? [{ type: 'web_search_20250305', name: 'web_search' }] : undefined;
+  const body = {
+    model,
+    max_tokens: 8192,
+    system: els.promptEdit.value,
+    messages: state.history,
+  };
+  if (tools) body.tools = tools;
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    let detail = errText;
+    try { detail = JSON.parse(errText).error.message; } catch(e){}
+    throw new Error(`${res.status}: ${detail}`);
+  }
+  return res.json();
+}
+
+els.composer.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (state.sending) return;
+  const text = els.userInput.value.trim();
+  if (!text && state.pending.length === 0) return;
+
+  const content = state.pending.map(p => p.block);
+  if (text) content.push({ type: 'text', text });
+  else if (content.length) content.push({ type: 'text', text: 'Here are my documents.' });
+
+  const userMsg = { role: 'user', content };
+  state.history.push(userMsg);
+  renderMessage(userMsg);
+
+  state.pending = [];
+  renderPending();
+  els.userInput.value = '';
+  els.userInput.style.height = 'auto';
+
+  state.sending = true;
+  els.sendBtn.disabled = true;
+  const thinking = document.createElement('div');
+  thinking.className = 'msg assistant';
+  thinking.innerHTML = '<div class="bubble thinking"><span></span><span></span><span></span></div>';
+  els.chat.appendChild(thinking);
+  els.chat.scrollTop = els.chat.scrollHeight;
+
+  try {
+    const data = await callClaude();
+    thinking.remove();
+    const assistantMsg = { role: 'assistant', content: data.content };
+    state.history.push(assistantMsg);
+    renderMessage(assistantMsg);
+    const flatText = data.content.filter(b => b.type === 'text').map(b => b.text).join('\n\n');
+    updatePhaseTracker(flatText);
+  } catch (err) {
+    thinking.remove();
+    const errWrap = document.createElement('div');
+    errWrap.className = 'msg assistant';
+    errWrap.innerHTML = `<div class="error-msg">Something went wrong: ${escapeHtml(err.message)}</div>`;
+    els.chat.appendChild(errWrap);
+    els.chat.scrollTop = els.chat.scrollHeight;
+    // Roll the user message back out of history so a retry doesn't duplicate it oddly.
+    state.history.pop();
+  } finally {
+    state.sending = false;
+    els.sendBtn.disabled = false;
+  }
+});
+
+els.downloadBtn.addEventListener('click', () => {
+  if (!state.history.length) { alert('Nothing to export yet.'); return; }
+  let md = `# Career Materials Builder — conversation export\n\n_Exported ${new Date().toLocaleString()}_\n\n`;
+  for (const msg of state.history) {
+    const who = msg.role === 'user' ? 'You' : 'Assistant';
+    const text = msg.content.filter(b => b.type === 'text').map(b => b.text).join('\n\n');
+    const attachments = msg.content.filter(b => b.type === 'document' || b.type === 'image')
+      .map(b => `_[attached: ${b.title || 'file'}]_`).join('\n');
+    md += `## ${who}\n\n${attachments ? attachments + '\n\n' : ''}${text}\n\n---\n\n`;
+  }
+  const blob = new Blob([md], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `career-materials-${new Date().toISOString().slice(0,10)}.md`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+</script>
+</body>
+</html>
