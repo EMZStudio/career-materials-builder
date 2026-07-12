@@ -9,8 +9,9 @@ material you can actually trust.
 **New to AI tools?** This works with "AI chat" websites — a page you type
 into and get a written answer back, the same way you'd text a very
 knowledgeable person. [Claude](https://claude.ai) (made by Anthropic) and
-[ChatGPT](https://chatgpt.com) are the two best-known ones, and both are free
-to try. You don't need to install anything to use the prompts below.
+[ChatGPT](https://chatgpt.com) are two examples — both have free versions to
+try, and others exist too. You don't need to install anything to use the
+prompts below.
 
 ## The two prompts
 
