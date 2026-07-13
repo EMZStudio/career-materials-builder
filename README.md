@@ -43,7 +43,7 @@ you something you can actually defend in an interview.
 
 ## The live app (optional, Claude-powered)
 
-👉 **[Open the app](#)** *(add your GitHub Pages link here once it's live)*
+👉 **[Open the app](https://EMZStudio.github.io/career-materials-builder/)**
 
 Same Part 1 process, but as a real app: reads PDF/DOCX files directly, pulls
 live market data, and tracks which step you're on. Runs entirely in your
